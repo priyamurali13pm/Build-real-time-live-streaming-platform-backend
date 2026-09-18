@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Twinn Live Studio</title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+</head>
+
+
+<body>
+
+    <div class="app">
+
+        <!-- HEADER -->
+
+        <header class="header">
+
+            <div>
+                <h1>🎥 Twinn Live Studio</h1>
+
+                <p>
+                    Creator Broadcasting Platform
+                </p>
+            </div>
+
+            <div
+                id="connectionStatus"
+                class="connection offline"
+            >
+                ● Backend Offline
+            </div>
+
+        </header>
+
+
+        <!-- MAIN CONTENT -->
+
+        <main class="main">
+
+            <!-- CAMERA SECTION -->
+
+            <section class="card camera-card">
+
+                <div class="card-header">
+
+                    <h2>📹 Camera Preview</h2>
+
+                    <span
+                        id="cameraStatus"
+                        class="badge offline"
+                    >
+                        Camera Off
+                    </span>
+
+                </div>
+
+
+                <div class="camera-container">
+
+                    <video
+                        id="cameraPreview"
+                        autoplay
+                        muted
+                        playsinline>
+                    </video>
+
+
+                    <div
+                        id="cameraPlaceholder"
+                        class="camera-placeholder"
+                    >
+
+                        <div class="camera-icon">
+                            📷
+                        </div>
+
+                        <p>
+                            Camera preview will appear here
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="camera-controls">
+
+                    <button
+                        id="startCameraButton"
+                        class="button primary"
+                    >
+                        📹 Start Camera
+                    </button>
+
+
+                    <button
+                        id="stopCameraButton"
+                        class="button secondary"
+                        disabled
+                    >
+                        ⏹ Stop Camera
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- STREAM DETAILS -->
+
+            <section class="card">
+
+                <div class="card-header">
+
+                    <h2>⚙️ Stream Setup</h2>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="streamTitle">
+                        Stream Title
+                    </label>
+
+                    <input
+                        type="text"
+                        id="streamTitle"
+                        placeholder="Enter your live stream title"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="category">
+                        Category
+                    </label>
+
+                    <select id="category">
+
+                        <option value="">
+                            Select category
+                        </option>
+
+                        <option value="Technology">
+                            Technology
+                        </option>
+
+                        <option value="Gaming">
+                            Gaming
+                        </option>
+
+                        <option value="Music">
+                            Music
+                        </option>
+
+                        <option value="Education">
+                            Education
+                        </option>
+
+                        <option value="Entertainment">
+                            Entertainment
+                        </option>
+
+                        <option value="Lifestyle">
+                            Lifestyle
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="userId">
+                        User ID
+                    </label>
+
+                    <input
+                        type="number"
+                        id="userId"
+                        value="1"
+                        min="1"
+                    >
+
+                </div>
+
+                <button
+                    id="createStreamButton"
+                    class="button primary">
+                    Create Stream
+                </button>
+
+            </section>
+
+
+            <!-- LIVE CONTROL -->
+
+            <section class="card live-card">
+
+                <div class="card-header">
+
+                    <h2>🔴 Go Live</h2>
+
+                    <span
+                        id="liveStatus"
+                        class="badge offline"
+                    >
+                        OFFLINE
+                    </span>
+
+                </div>
+
+
+                <div class="live-info">
+
+                    <p>
+                        Stream:
+                        <strong id="streamName">
+                            Not created
+                        </strong>
+                    </p>
+
+                    <p>
+                        Stream ID:
+                        <strong id="streamId">
+                            -
+                        </strong>
+                    </p>
+
+                </div>
+
+
+                <div class="live-controls">
+
+                    <button
+                        id="goLiveButton"
+                        class="button live"
+                        disabled
+                    >
+                        🔴 GO LIVE
+                    </button>
+
+
+                    <button
+                        id="stopLiveButton"
+                        class="button stop"
+                        disabled
+                    >
+                        ⏹ STOP LIVE
+                    </button>
+
+                </div>
+
+
+                <div
+                    id="liveMessage"
+                    class="message"
+                >
+                </div>
+
+            </section>
+
+
+            <!-- STREAM INFORMATION -->
+
+            <section class="card">
+
+                <div class="card-header">
+
+                    <h2>📊 Stream Information</h2>
+
+                </div>
+
+
+                <div class="stats">
+
+                    <div class="stat">
+
+                        <span class="stat-label">
+                            Connection
+                        </span>
+
+                        <strong id="streamConnection">
+                            Offline
+                        </strong>
+
+                    </div>
+
+
+                    <div class="stat">
+
+                        <span class="stat-label">
+                            Stream Status
+                        </span>
+
+                        <strong id="streamStatus">
+                            Offline
+                        </strong>
+
+                    </div>
+
+
+                    <div class="stat">
+
+                        <span class="stat-label">
+                            Video
+                        </span>
+
+                        <strong id="videoStatus">
+                            Not receiving
+                        </strong>
+
+                    </div>
+
+
+                    <div class="stat">
+
+                        <span class="stat-label">
+                            Audio
+                        </span>
+
+                        <strong id="audioStatus">
+                            Not receiving
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+
+        <!-- FOOTER -->
+
+        <footer>
+
+            <p>
+                Twinn Live Studio • Powered by Node.js + MediaMTX
+            </p>
+
+        </footer>
+
+    </div>
+
+
+    <script src="js/app.js"></script>
+
+</body>
+
+</html>

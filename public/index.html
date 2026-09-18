@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TwitCasting Live</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header>
+            <h1>🎥 TwitCasting Live</h1>
+            <p>Live Streaming Dashboard</p>
+        </header>
+
+        <section class="card">
+
+            <h2>Create a Live Stream</h2>
+
+            <label>Stream Title</label>
+            <input
+                type="text"
+                id="title"
+                placeholder="Enter stream title"
+            >
+        <section class="card">
+
+            <h2>🔴 Live Video</h2>
+
+            <div class="video-container">
+
+                <iframe
+                    id="livePlayer"
+                    src="http://localhost:8889/mystream"
+                    width="100%"
+                    height="400"
+                    frameborder="0"
+                    allow="autoplay; camera; microphone; fullscreen">
+                </iframe>
+
+            </div>
+
+        </section>             
+
+            <label>User ID</label>
+            <input
+                type="number"
+                id="userId"
+                placeholder="Enter user ID"
+                value="1"
+            >
+
+            <label>Category</label>
+            <input
+                type="text"
+                id="category"
+                placeholder="Technology"
+            >
+
+            <button onclick="createStream()">
+                Create Stream
+            </button>
+
+        </section>
+
+        <section class="card">
+
+            <h2>Stream Control</h2>
+
+            <div id="streamInfo">
+                No stream created yet.
+            </div>
+
+            <div class="buttons">
+
+                <button
+                    class="start"
+                    onclick="startStream()">
+                    ▶ Start Stream
+                </button>
+
+                <button
+                    class="stop"
+                    onclick="stopStream()">
+                    ■ Stop Stream
+                </button>
+
+            </div>
+
+        </section>
+
+        <section class="card">
+
+            <h2>Stream Status</h2>
+
+            <div id="status">
+                ⚪ OFFLINE
+            </div>
+
+
+            <h2>Stream Health</h2>
+
+            <div id="healthPanel">
+                <p>Connection: <span id="connectionHealth">Checking...</span></p>
+                <p>Video: <span id="videoHealth">Checking...</span></p>
+                <p>Audio: <span id="audioHealth">Checking...</span></p>
+                <p>Errors: <span id="streamErrors">-</span></p>
+                <p>Last Checked: <span id="lastChecked">-</span></p>
+            </div>
+
+        </section>
+
+        
+
+    </div>
+
+    <script src="app.js"></script>
+
+</body>
+</html>

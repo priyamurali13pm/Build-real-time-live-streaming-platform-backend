@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TwitCasting WebSocket Test</title>
+</head>
+
+<body>
+    <h2>TwitCasting WebSocket Test</h2>
+
+    <pre id="output"></pre>
+
+    <script>
+        const output = document.getElementById("output");
+
+        const ws = new WebSocket(
+            "ws://localhost:5000/ws/streams"
+        );
+
+        ws.onopen = () => {
+            output.textContent += "🔌 Connected\n";
+        };
+
+        ws.onmessage = (event) => {
+            output.textContent += event.data + "\n";
+        };
+
+        ws.onclose = () => {
+            output.textContent += "🔴 Disconnected\n";
+        };
+
+        ws.onerror = () => {
+            output.textContent += "❌ WebSocket error\n";
+        };
+    </script>
+</body>
+</html>

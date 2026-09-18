@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Twinn Live - Viewer</title>
+
+    <link
+        rel="stylesheet"
+        href="/broadcaster/css/style.css"
+    >
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================================
+         HEADER
+    ========================================== -->
+
+    <header class="header">
+
+        <div class="header-content">
+
+            <div>
+
+                <h1>📺 Twinn Live</h1>
+
+                <p>
+                    Live Streaming Viewer
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <span
+                    id="connectionStatus"
+                    class="status-badge"
+                >
+                    Connecting...
+                </span>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+
+    <main class="container">
+
+
+        <!-- =========================================
+             LIVE VIDEO
+        ========================================== -->
+
+        <section class="card">
+
+            <div class="card-header">
+
+                <h2>
+                    🔴 Live Stream
+                </h2>
+
+
+                <span
+                    id="liveBadge"
+                    class="status-badge"
+                >
+                    OFFLINE
+                </span>
+
+            </div>
+
+
+            <div class="video-container">
+
+
+                <video
+                    id="liveVideo"
+                    controls
+                    autoplay
+                    playsinline
+                    muted
+                ></video>
+
+
+                <div
+                    id="videoPlaceholder"
+                    class="camera-placeholder"
+                >
+
+                    <div class="placeholder-icon">
+                        📺
+                    </div>
+
+
+                    <h3>
+                        No Live Stream
+                    </h3>
+
+
+                    <p>
+                        Select a live stream to start watching.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =========================================
+             STREAM INFORMATION
+        ========================================== -->
+
+        <section class="card">
+
+            <h2>
+                📊 Stream Information
+            </h2>
+
+
+            <div class="stats-grid">
+
+
+                <div class="stat-card">
+
+                    <span class="stat-label">
+                        Stream
+                    </span>
+
+
+                    <strong id="streamTitle">
+                        —
+                    </strong>
+
+                </div>
+
+
+
+                <div class="stat-card">
+
+                    <span class="stat-label">
+                        Stream ID
+                    </span>
+
+
+                    <strong id="streamId">
+                        —
+                    </strong>
+
+                </div>
+
+
+
+                <div class="stat-card">
+
+                    <span class="stat-label">
+                        Category
+                    </span>
+
+
+                    <strong id="streamCategory">
+                        —
+                    </strong>
+
+                </div>
+
+
+
+                <div class="stat-card">
+
+                    <span class="stat-label">
+                        Status
+                    </span>
+
+
+                    <strong id="streamStatus">
+                        Offline
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =========================================
+             AVAILABLE LIVE STREAMS
+        ========================================== -->
+
+        <section class="card">
+
+            <div class="card-header">
+
+                <h2>
+                    📡 Available Live Streams
+                </h2>
+
+            </div>
+
+
+            <div id="streamList">
+
+                <div class="camera-placeholder">
+
+                    <div class="placeholder-icon">
+                        🔎
+                    </div>
+
+
+                    <p>
+                        Checking for live streams...
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+
+    <!-- =========================================
+         FOOTER
+    ========================================== -->
+
+    <footer class="footer">
+
+        <p>
+            Twinn Live • Live Streaming Platform
+        </p>
+
+    </footer>
+
+
+
+<script>
+
+
+// =============================================
+// DOM ELEMENTS
+// =============================================
+
+const liveVideo =
+    document.getElementById("liveVideo");
+
+
+const videoPlaceholder =
+    document.getElementById("videoPlaceholder");
+
+
+const connectionStatus =
+    document.getElementById("connectionStatus");
+
+
+const liveBadge =
+    document.getElementById("liveBadge");
+
+
+const streamTitle =
+    document.getElementById("streamTitle");
+
+
+const streamId =
+    document.getElementById("streamId");
+
+
+const streamCategory =
+    document.getElementById("streamCategory");
+
+
+const streamStatus =
+    document.getElementById("streamStatus");
+
+
+const streamList =
+    document.getElementById("streamList");
+
+
+
+let selectedStream = null;
+
+let peerConnection = null;
+
+let webSocket = null;
+
+
+
+// =============================================
+// RESET PLAYER
+// =============================================
+
+function resetPlayer() {
+
+    console.log(
+        "🛑 Resetting viewer player"
+    );
+
+
+    // Close WebRTC connection
+
+    if (peerConnection) {
+
+        peerConnection.close();
+
+        peerConnection = null;
+
+    }
+
+
+    // Stop video
+
+    liveVideo.pause();
+
+    liveVideo.srcObject = null;
+
+
+    // Show placeholder
+
+    videoPlaceholder.style.display =
+        "flex";
+
+
+    // Reset badge
+
+    liveBadge.textContent =
+        "OFFLINE";
+
+
+    liveBadge.className =
+        "status-badge error";
+
+
+    // Reset status
+
+    streamStatus.textContent =
+        "Offline";
+
+}
+
+
+
+// =============================================
+// LOAD STREAMS
+// =============================================
+
+async function loadStreams() {
+
+    try {
+
+        const response =
+            await fetch("/api/streams");
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Failed to load streams"
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        displayStreams(
+            data.streams || []
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ Stream loading error:",
+            error
+        );
+
+    }
+
+}
+
+
+
+// =============================================
+// DISPLAY STREAMS
+// =============================================
+
+function displayStreams(streams) {
+
+
+    const liveStreams =
+        streams.filter(
+            stream =>
+                stream.status === "live"
+        );
+
+
+
+    // =========================================
+    // NO LIVE STREAMS
+    // =========================================
+
+    if (liveStreams.length === 0) {
+
+        streamList.innerHTML = `
+
+            <div class="camera-placeholder">
+
+                <div class="placeholder-icon">
+                    📺
+                </div>
+
+                <h3>
+                    No Live Streams
+                </h3>
+
+                <p>
+                    There are currently no live streams.
+                </p>
+
+            </div>
+
+        `;
+
+
+        // If selected stream is no longer live
+
+        if (selectedStream) {
+
+            const stillLive =
+                streams.some(
+                    stream =>
+                        stream.id === selectedStream.id &&
+                        stream.status === "live"
+                );
+
+
+            if (!stillLive) {
+
+                selectedStream = null;
+
+                resetPlayer();
+
+            }
+
+        }
+
+
+        return;
+
+    }
+
+
+
+    // =========================================
+    // CREATE STREAM LIST
+    // =========================================
+
+    streamList.innerHTML = "";
+
+
+    liveStreams.forEach(stream => {
+
+
+        const streamCard =
+            document.createElement("div");
+
+
+        streamCard.className =
+            "stat-card";
+
+
+        streamCard.style.cursor =
+            "pointer";
+
+
+        streamCard.innerHTML = `
+
+            <span class="stat-label">
+                🔴 LIVE
+            </span>
+
+            <strong>
+                ${stream.title}
+            </strong>
+
+            <p>
+                ${stream.category || "General"}
+            </p>
+
+            <small>
+                Stream ID: ${stream.id}
+            </small>
+
+        `;
+
+
+        streamCard.addEventListener(
+            "click",
+            () => selectStream(stream)
+        );
+
+
+        streamList.appendChild(
+            streamCard
+        );
+
+    });
+
+
+
+    // =========================================
+    // AUTO SELECT
+    // =========================================
+
+    if (!selectedStream) {
+
+        selectStream(
+            liveStreams[0]
+        );
+
+    }
+
+}
+
+
+
+// =============================================
+// SELECT STREAM
+// =============================================
+
+async function selectStream(stream) {
+
+
+    if (!stream) {
+        return;
+    }
+
+
+    console.log(
+        "🎬 Selected stream:",
+        stream
+    );
+
+
+    selectedStream = stream;
+
+
+    streamTitle.textContent =
+        stream.title || "—";
+
+
+    streamId.textContent =
+        stream.id || "—";
+
+
+    streamCategory.textContent =
+        stream.category || "—";
+
+
+
+    if (stream.status !== "live") {
+
+        resetPlayer();
+
+        return;
+
+    }
+
+
+
+    streamStatus.textContent =
+        "LIVE";
+
+
+    liveBadge.textContent =
+        "LIVE";
+
+
+    liveBadge.className =
+        "status-badge success";
+
+
+    videoPlaceholder.style.display =
+        "none";
+
+
+
+    await connectToMediaMTX(stream);
+
+}
+
+
+
+// =============================================
+// MEDIAMTX WEBRTC
+// =============================================
+
+async function connectToMediaMTX(stream) {
+
+
+    try {
+
+
+        console.log(
+            "🎥 Connecting to MediaMTX..."
+        );
+
+
+
+        // Close previous connection
+
+        if (peerConnection) {
+
+            peerConnection.close();
+
+            peerConnection = null;
+
+        }
+
+
+
+        peerConnection =
+            new RTCPeerConnection();
+
+
+
+        // Receive video
+
+        peerConnection.addTransceiver(
+            "video",
+            {
+                direction: "recvonly"
+            }
+        );
+
+
+
+        // Receive audio
+
+        peerConnection.addTransceiver(
+            "audio",
+            {
+                direction: "recvonly"
+            }
+        );
+
+
+
+        // =====================================
+        // MEDIA TRACK RECEIVED
+        // =====================================
+
+        peerConnection.ontrack =
+            event => {
+
+
+                console.log(
+                    "🎬 Media track received:",
+                    event.track.kind
+                );
+
+
+                if (
+                    event.streams &&
+                    event.streams[0]
+                ) {
+
+                    liveVideo.srcObject =
+                        event.streams[0];
+
+
+                    videoPlaceholder.style.display =
+                        "none";
+
+
+                    liveBadge.textContent =
+                        "LIVE";
+
+
+                    liveBadge.className =
+                        "status-badge success";
+
+
+                    liveVideo.play()
+                        .catch(() => {});
+
+                }
+
+            };
+
+
+
+        // =====================================
+        // WEBRTC CONNECTION STATE
+        // =====================================
+
+        peerConnection.onconnectionstatechange =
+            () => {
+
+
+                if (!peerConnection) {
+                    return;
+                }
+
+
+                const state =
+                    peerConnection.connectionState;
+
+
+                console.log(
+                    "WebRTC state:",
+                    state
+                );
+
+
+
+                if (state === "connected") {
+
+                    liveBadge.textContent =
+                        "LIVE";
+
+
+                    liveBadge.className =
+                        "status-badge success";
+
+
+                    videoPlaceholder.style.display =
+                        "none";
+
+                }
+
+
+
+                if (
+                    state === "failed" ||
+                    state === "disconnected" ||
+                    state === "closed"
+                ) {
+
+                    console.warn(
+                        "⚠️ WebRTC connection lost"
+                    );
+
+
+                    resetPlayer();
+
+                }
+
+            };
+
+
+
+        // =====================================
+        // CREATE SDP OFFER
+        // =====================================
+
+        const offer =
+            await peerConnection.createOffer();
+
+
+        await peerConnection.setLocalDescription(
+            offer
+        );
+
+
+
+        // =====================================
+        // WAIT FOR ICE
+        // =====================================
+
+        await waitForIceGathering(
+            peerConnection
+        );
+
+
+
+        const localDescription =
+            peerConnection.localDescription;
+
+
+
+        // =====================================
+        // MEDIAMTX WHEP URL
+        // =====================================
+
+        const whepUrl =
+            `http://${window.location.hostname}:8889/${stream.mediaPath}/whep`;
+
+
+        console.log(
+            "📡 WHEP:",
+            whepUrl
+        );
+
+
+
+        // =====================================
+        // SEND OFFER TO MEDIAMTX
+        // =====================================
+
+        const response =
+            await fetch(
+                whepUrl,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/sdp"
+                    },
+
+                    body:
+                        localDescription.sdp
+                }
+            );
+
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                `MediaMTX returned ${response.status}`
+            );
+
+        }
+
+
+
+        // =====================================
+        // RECEIVE ANSWER
+        // =====================================
+
+        const answer =
+            await response.text();
+
+
+
+        await peerConnection.setRemoteDescription(
+            {
+                type: "answer",
+                sdp: answer
+            }
+        );
+
+
+
+        console.log(
+            "✅ MediaMTX WebRTC connected"
+        );
+
+
+    } catch (error) {
+
+
+        console.error(
+            "❌ MediaMTX WebRTC error:",
+            error
+        );
+
+
+        resetPlayer();
+
+    }
+
+}
+
+
+
+// =============================================
+// ICE GATHERING
+// =============================================
+
+function waitForIceGathering(
+    connection
+) {
+
+
+    return new Promise(resolve => {
+
+
+        if (
+            connection.iceGatheringState ===
+            "complete"
+        ) {
+
+            resolve();
+
+            return;
+
+        }
+
+
+
+        const checkState = () => {
+
+
+            if (
+                connection.iceGatheringState ===
+                "complete"
+            ) {
+
+
+                connection.removeEventListener(
+                    "icegatheringstatechange",
+                    checkState
+                );
+
+
+                resolve();
+
+            }
+
+        };
+
+
+
+        connection.addEventListener(
+            "icegatheringstatechange",
+            checkState
+        );
+
+    });
+
+}
+
+
+
+// =============================================
+// BACKEND CHECK
+// =============================================
+
+async function checkBackend() {
+
+
+    try {
+
+
+        const response =
+            await fetch("/");
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Backend unavailable"
+            );
+
+        }
+
+
+        connectionStatus.textContent =
+            "Healthy";
+
+
+        connectionStatus.className =
+            "status-badge success";
+
+
+    } catch (error) {
+
+
+        connectionStatus.textContent =
+            "Offline";
+
+
+        connectionStatus.className =
+            "status-badge error";
+
+    }
+
+}
+
+
+
+// =============================================
+// WEBSOCKET
+// =============================================
+
+function connectWebSocket() {
+
+
+    const protocol =
+        location.protocol === "https:"
+            ? "wss:"
+            : "ws:";
+
+
+
+    webSocket =
+        new WebSocket(
+            `${protocol}//${location.host}/ws/streams`
+        );
+
+
+
+    webSocket.onopen = () => {
+
+
+        console.log(
+            "🔌 Viewer WebSocket connected"
+        );
+
+    };
+
+
+
+    webSocket.onmessage =
+        event => {
+
+
+            try {
+
+
+                const message =
+                    JSON.parse(event.data);
+
+
+
+                if (
+                    message.type ===
+                    "stream_status"
+                ) {
+
+
+                    handleStreamUpdate(
+                        message.stream
+                    );
+
+                }
+
+
+            } catch (error) {
+
+
+                console.error(
+                    "WebSocket message error:",
+                    error
+                );
+
+            }
+
+        };
+
+
+
+    webSocket.onclose = () => {
+
+
+        console.log(
+            "🔌 Viewer WebSocket disconnected"
+        );
+
+
+        setTimeout(
+            connectWebSocket,
+            3000
+        );
+
+    };
+
+
+
+    webSocket.onerror = error => {
+
+
+        console.error(
+            "Viewer WebSocket error:",
+            error
+        );
+
+    };
+
+}
+
+
+
+// =============================================
+// HANDLE STREAM UPDATE
+// =============================================
+
+function handleStreamUpdate(stream) {
+
+
+    if (!stream) {
+        return;
+    }
+
+
+    console.log(
+        "📡 Stream update:",
+        stream
+    );
+
+
+
+    // =========================================
+    // CURRENT SELECTED STREAM STOPPED
+    // =========================================
+
+    if (
+        selectedStream &&
+        selectedStream.id === stream.id &&
+        stream.status !== "live"
+    ) {
+
+
+        console.log(
+            `🛑 Stream ${stream.id} is no longer live`
+        );
+
+
+        selectedStream = null;
+
+
+        streamTitle.textContent =
+            "—";
+
+
+        streamId.textContent =
+            "—";
+
+
+        streamCategory.textContent =
+            "—";
+
+
+        resetPlayer();
+
+
+        // Reload list
+
+        loadStreams();
+
+
+        return;
+
+    }
+
+
+
+    // =========================================
+    // CURRENT STREAM BECOMES LIVE
+    // =========================================
+
+    if (
+        selectedStream &&
+        selectedStream.id === stream.id &&
+        stream.status === "live"
+    ) {
+
+
+        selectedStream =
+            stream;
+
+
+        streamTitle.textContent =
+            stream.title || "—";
+
+
+        streamId.textContent =
+            stream.id || "—";
+
+
+        streamCategory.textContent =
+            stream.category || "—";
+
+
+        streamStatus.textContent =
+            "LIVE";
+
+
+        liveBadge.textContent =
+            "LIVE";
+
+
+        liveBadge.className =
+            "status-badge success";
+
+
+        return;
+
+    }
+
+
+
+    // =========================================
+    // REFRESH LIVE STREAM LIST
+    // =========================================
+
+    loadStreams();
+
+}
+
+
+
+// =============================================
+// INITIALIZE
+// =============================================
+
+checkBackend();
+
+loadStreams();
+
+connectWebSocket();
+
+
+</script>
+
+
+</body>
+
+</html>

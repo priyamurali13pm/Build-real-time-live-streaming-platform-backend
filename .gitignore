@@ -1,0 +1,12 @@
+node_modules/
+.env
+*.log
+twitcasting.db
+twitcasting.db-shm
+twitcasting.db-wal
+
+.vscode/
+.DS_Store
+
+*.tmp
+*.temp
