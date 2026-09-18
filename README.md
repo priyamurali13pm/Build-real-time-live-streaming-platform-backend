@@ -6,67 +6,61 @@ The platform provides stream creation, live stream lifecycle management, RTMP in
 
 ## Project Architecture
 
+```text
 Broadcaster
-    ↓
+     ↓
 Node.js + Express API
-    ↓
+     ↓
 FFmpeg
-    ↓
+     ↓
 RTMP
-    ↓
+     ↓
 MediaMTX
-    ↓
+     ↓
 WebRTC / WHEP
-    ↓
+     ↓
 Viewer
 
 Real-time stream status:
+
 Node.js → WebSocket → Viewer
-
-## Key Features
-
-- User creation and management
-- Live stream creation
-- Stream start and stop controls
-- SQLite database persistence
-- FFmpeg streaming integration
-- RTMP stream ingestion
-- MediaMTX media server integration
-- Real-time stream health monitoring
-- Video and audio track detection
-- WebSocket real-time stream status updates
-- WebRTC/WHEP live video playback
-- Automatic viewer player reset when a stream ends
-- Separate broadcaster and viewer interfaces
-- REST API architecture
-
-## Technology Stack
-
-### Backend
-- Node.js
-- Express.js
-- SQLite
-- better-sqlite3
-- Axios
-- WebSocket
-
-### Streaming
-- FFmpeg
-- RTMP
-- MediaMTX
-- WebRTC
-- WHEP
-
-### Frontend
-- HTML
-- CSS
-- JavaScript
-- WebSocket API
-- WebRTC API
-
-## Application Flow
-
-### Broadcaster
+Key Features
+User creation and management
+Live stream creation
+Stream start and stop controls
+SQLite database persistence
+FFmpeg streaming integration
+RTMP stream ingestion
+MediaMTX media server integration
+Real-time stream health monitoring
+Video and audio track detection
+WebSocket real-time stream status updates
+WebRTC/WHEP live video playback
+Automatic viewer player reset when a stream ends
+Separate broadcaster and viewer interfaces
+REST API architecture
+Technology Stack
+Backend
+Node.js
+Express.js
+SQLite
+better-sqlite3
+Axios
+WebSocket
+Streaming
+FFmpeg
+RTMP
+MediaMTX
+WebRTC
+WHEP
+Frontend
+HTML
+CSS
+JavaScript
+WebSocket API
+WebRTC API
+Application Flow
+Broadcaster
 
 The broadcaster creates a stream through the Node.js API.
 
@@ -74,28 +68,27 @@ The backend creates a unique media path for the stream and manages its lifecycle
 
 When the stream starts, FFmpeg sends the media through RTMP to MediaMTX.
 
-### Media Server
+Media Server
 
 MediaMTX receives the RTMP stream and makes the media available for WebRTC playback.
 
-### Health Monitoring
+Health Monitoring
 
 The backend periodically checks MediaMTX to determine whether the stream is online and whether video and audio tracks are being received.
 
-### Real-Time Updates
+Real-Time Updates
 
 The backend uses WebSocket to broadcast stream status changes to connected clients.
 
-For example:
+Stream lifecycle states include:
 
-- starting
-- live
-- stopping
-- stopped
-- offline
-- error
-
-### Viewer
+starting
+live
+stopping
+stopped
+offline
+error
+Viewer
 
 The viewer connects to MediaMTX using WebRTC/WHEP.
 
@@ -103,14 +96,10 @@ The viewer receives both video and audio tracks and can watch the live stream in
 
 When the broadcaster stops the stream, the backend sends a WebSocket update and the viewer automatically resets the WebRTC player.
 
-## API Endpoints
-
-### Users
-
-```text
+API Endpoints
+Users
 POST /api/users
 GET /api/users
-
 Streams
 GET /api/streams
 GET /api/streams/:id
@@ -160,14 +149,27 @@ Stream Stop
 WebSocket Notification
       ↓
 Viewer Player Reset
+
+The following functionality was successfully tested:
+
+Stream creation
+Stream start
+FFmpeg streaming
+RTMP ingestion
+MediaMTX integration
+Video and audio reception
+WebRTC playback
+Real-time WebSocket updates
+Stream health monitoring
+Stream stop
+Automatic viewer player reset
 Project Status
 
 Functional MVP completed.
 
 The current implementation demonstrates the core real-time streaming architecture and stream lifecycle management.
 
-Future production enhancements can include:
-
+Future Production Enhancements
 User authentication
 Stream keys
 Real browser camera publishing
