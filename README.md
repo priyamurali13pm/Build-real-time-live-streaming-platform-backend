@@ -24,6 +24,7 @@ Viewer
 Real-time stream status:
 
 Node.js → WebSocket → Viewer
+
 Key Features
 User creation and management
 Live stream creation
@@ -39,6 +40,7 @@ WebRTC/WHEP live video playback
 Automatic viewer player reset when a stream ends
 Separate broadcaster and viewer interfaces
 REST API architecture
+
 Technology Stack
 Backend
 Node.js
